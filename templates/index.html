@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Utility Tool</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      body {
+        background-color: #f4f7fc;
+        font-family: Arial, sans-serif;
+      }
+      .hidden {
+        display: none;
+      }
+      .menu-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .section {
+        padding: 20px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body class="container mt-5">
+    <div class="header">
+      <h2>PDF Utility Tool</h2>
+      <p class="text-muted">
+        A simple tool to perform various operations on PDFs with ease.
+      </p>
+    </div>
+
+    <div class="menu-container">
+      <div class="dropdown">
+        <button
+          class="btn btn-primary dropdown-toggle"
+          type="button"
+          id="menuDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          Select Action
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="menuDropdown">
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('merge')"
+              >Merge PDFs</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('split')"
+              >Split PDFs</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('compress')"
+              >Compress PDF</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="showSection('extract_text')"
+              >Extract Text</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('reorder')"
+              >Reorder Pages</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('rotate')"
+              >Rotate Pages</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('delete')"
+              >Delete Pages</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="showSection('password-protect')"
+              >Password Protect PDF</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="showSection('remove-password')"
+              >Remove PDF Password</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('pdfToDocx')"
+              >Convert PDF to DOCX</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" onclick="showSection('docxToPdf')"
+              >Convert DOCX to PDF</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="sections-container" class="mt-4">
+      <!-- Merge PDFs -->
+      <div id="merge" class="hidden section">
+        <h4>Merge PDFs</h4>
+        <p>Combine multiple PDF files into a single document.</p>
+        <input type="file" id="mergeFiles" class="form-control" multiple />
+        <button class="btn btn-success mt-2" onclick="performMerge()">
+          Merge PDFs
+        </button>
+      </div>
+
+      <!-- Split PDF -->
+      <div id="split" class="hidden section">
+        <h4>Split PDF</h4>
+        <p>Extract specific pages from a PDF file.</p>
+        <input type="file" id="splitFile" class="form-control" />
+        <button class="btn btn-warning mt-2" onclick="performSplit()">
+          Split PDF
+        </button>
+
+        <!-- Split Result Section (Initially Hidden) -->
+        <div id="splitResult" class="hidden mt-3">
+          <label for="pageSelect">Select a Page to Download:</label>
+          <select id="pageSelect" class="form-control mt-2"></select>
+          <button id="downloadPageBtn" class="btn btn-success mt-2 hidden">
+            Download Selected Page
+          </button>
+        </div>
+      </div>
+
+      <!-- Compress PDF -->
+      <div id="compress" class="hidden section">
+        <h4>Compress PDF</h4>
+        <p>Reduce the size of your PDF while maintaining quality.</p>
+        <input type="file" id="compressFile" class="form-control" />
+        <button class="btn btn-info mt-2" onclick="performCompress()">
+          Compress PDF
+        </button>
+      </div>
+
+      <!-- Extract Text from PDF -->
+      <div id="extract_text" class="hidden section">
+        <h4>Extract Text from PDF</h4>
+        <p>Retrieve text content from your PDF document.</p>
+        <input type="file" id="extractFile" class="form-control" />
+        <button class="btn btn-secondary mt-2" onclick="performExtractText()">
+          Extract Text
+        </button>
+
+        <!-- Output Display -->
+        <div id="extractedTextResult" class="hidden mt-3">
+          <h5>Extracted Text:</h5>
+          <textarea
+            id="extractedText"
+            class="form-control"
+            rows="6"
+            readonly
+          ></textarea>
+          <button id="downloadTextBtn" class="btn btn-success mt-2 hidden">
+            Download as TXT
+          </button>
+        </div>
+      </div>
+
+      <!-- Reorder Pages in PDF -->
+      <div id="reorder" class="hidden section">
+        <h4>Reorder Pages in PDF</h4>
+        <p>Change the order of pages in your PDF document.</p>
+
+        <input type="file" id="reorderFile" class="form-control mb-2" />
+
+        <label for="pageOrder"
+          >Enter new page order (comma-separated, e.g., 3,1,2):</label
+        >
+        <input
+          type="text"
+          id="pageOrder"
+          class="form-control mb-2"
+          placeholder="e.g., 3,1,2"
+        />
+
+        <button class="btn btn-dark mt-2" onclick="performReorder()">
+          Reorder Pages
+        </button>
+      </div>
+
+      <!-- Rotate PDF -->
+      <div id="rotate" class="hidden section">
+        <h4>Rotate PDF</h4>
+        <p>Rotate pages in your PDF file.</p>
+
+        <input type="file" id="rotateFile" class="form-control mb-2" />
+
+        <label>Select rotation angle:</label>
+        <div class="form-check">
+          <input type="checkbox" id="rotate90" class="form-check-input" />
+          <label for="rotate90" class="form-check-label">90°</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="rotate180" class="form-check-input" />
+          <label for="rotate180" class="form-check-label">180°</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="rotate270" class="form-check-input" />
+          <label for="rotate270" class="form-check-label">270°</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="rotate-90" class="form-check-input" />
+          <label for="rotate-90" class="form-check-label"
+            >-90° (Counterclockwise)</label
+          >
+        </div>
+
+        <button class="btn btn-primary mt-2" onclick="performRotate()">
+          Rotate PDF
+        </button>
+      </div>
+
+      <!-- Delete Pages from PDF -->
+      <div id="delete" class="hidden section">
+        <h4>Delete Pages from PDF</h4>
+        <p>
+          Remove unwanted pages from your PDF. Enter page numbers separated by
+          commas (e.g., 1, 3, 5-7).
+        </p>
+
+        <input type="file" id="deleteFile" class="form-control mb-2" />
+
+        <label for="deletePages">Pages to delete:</label>
+        <input
+          type="text"
+          id="deletePages"
+          class="form-control mb-2"
+          placeholder="Enter pages (e.g., 1, 3, 5-7)"
+        />
+
+        <button class="btn btn-danger mt-2" onclick="performDelete()">
+          Delete Pages
+        </button>
+      </div>
+
+      <!-- Password Protect PDF -->
+      <div id="password-protect" class="hidden section">
+        <h4>Password Protect PDF</h4>
+        <p>Secure your PDF with a password.</p>
+
+        <input type="file" id="passwordFile" class="form-control mb-2" />
+
+        <label for="pdfPassword">Enter Password:</label>
+        <input
+          type="password"
+          id="pdfPassword"
+          class="form-control mb-2"
+          placeholder="Enter password"
+        />
+
+        <button class="btn btn-danger mt-2" onclick="performPasswordProtect()">
+          Protect PDF
+        </button>
+      </div>
+
+      <!-- Remove Password from PDF -->
+      <div id="remove-password" class="hidden section">
+        <h4>Remove Password from PDF</h4>
+        <p>Unlock a password-protected PDF.</p>
+        <input type="file" id="unlockFile" class="form-control" />
+
+        <label for="pdfPassword">Enter Password:</label>
+        <input
+          type="password"
+          id="pdfPasswordToRemove"
+          class="form-control mb-2"
+          placeholder="Enter password"
+        />
+        <button
+          class="btn btn-secondary mt-2"
+          onclick="performRemovePassword()"
+        >
+          Remove Password
+        </button>
+      </div>
+
+      <!-- Convert PDF to DOCX -->
+      <div id="pdfToDocx" class="hidden section">
+        <h4>Convert PDF to DOCX</h4>
+        <p>Transform your PDF into an editable Word document.</p>
+        <input type="file" id="pdfToDocxFile" class="form-control" />
+        <button class="btn btn-primary mt-2" onclick="convertPdfToDocx()">
+          Convert
+        </button>
+      </div>
+
+      <!-- Convert DOCX to PDF -->
+      <div id="docxToPdf" class="hidden section">
+        <h4>Convert DOCX to PDF</h4>
+        <p>Convert a Word document into a non-editable PDF file.</p>
+        <input type="file" id="docxToPdfFile" class="form-control" />
+        <button class="btn btn-primary mt-2" onclick="convertDocxToPdf()">
+          Convert
+        </button>
+      </div>
+    </div>
+
+    <!-- Output Display -->
+    <div class="mt-4">
+      <h4>Output:</h4>
+      <div id="output" class="alert alert-info">
+        Select an action to proceed.
+      </div>
+    </div>
+    <script>
+      function showSection(section) {
+        $("#sections-container > div").addClass("hidden");
+        $("#" + section).removeClass("hidden");
+        $("#output").html("Ready for action.");
+      }
+
+      function performMerge() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("mergeFiles");
+
+        if (fileInput.files.length < 2) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload at least two PDF files.</div>"
+          );
+          return;
+        }
+
+        for (let file of fileInput.files) {
+          formData.append("files", file);
+        }
+
+        $("#output").html(
+          "<div class='alert alert-info'>Merging... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/merge",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Merge successful! 
+                            <a href="${response.file_url}" class="btn btn-success">Download Merged PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performSplit() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("splitFile");
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Splitting... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/split",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.split_files && response.split_files.length > 0) {
+              // Show the page selection dropdown
+              $("#splitResult").removeClass("hidden");
+
+              let pageSelect = $("#pageSelect");
+              pageSelect.empty();
+
+              // Populate dropdown with page numbers
+              response.split_files.forEach((file_url, index) => {
+                pageSelect.append(
+                  `<option value="${file_url}">Page ${index + 1}</option>`
+                );
+              });
+
+              // Show the download button
+              $("#downloadPageBtn")
+                .removeClass("hidden")
+                .off("click")
+                .on("click", function () {
+                  let selectedUrl = $("#pageSelect").val();
+                  window.location.href = selectedUrl; // Trigger download
+                });
+
+              $("#output").html(
+                "<div class='alert alert-success'>Split successful! Choose a page to download.</div>"
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performCompress() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("compressFile");
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Compressing... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/compress-pdf",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Compression successful! 
+                        <a href="${response.file_url}" class="btn btn-success">Download Compressed PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performExtractText() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("extractFile");
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Extracting text... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/extract_text",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.extracted_text) {
+              // Updated to match backend
+              $("#extractedText").val(response.extracted_text); // Updated key
+              $("#extractedTextResult").removeClass("hidden");
+              $("#downloadTextBtn").removeClass("hidden");
+
+              // Set up download button functionality
+              $("#downloadTextBtn")
+                .off("click")
+                .on("click", function () {
+                  let blob = new Blob([response.extracted_text], {
+                    type: "text/plain",
+                  }); // Updated key
+                  let link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.download = "extracted_text.txt";
+                  link.click();
+                });
+
+              $("#output").html(
+                "<div class='alert alert-success'>Text extracted successfully!</div>"
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>No text found in the PDF.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performReorder() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("reorderFile");
+        let pageOrder = document.getElementById("pageOrder").value.trim();
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        if (pageOrder === "") {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please enter the page order.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("order", pageOrder);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Reordering... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/reorder-pages",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Reordering successful! 
+                    <a href="${response.file_url}" class="btn btn-success">Download Reordered PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performRotate() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("rotateFile");
+        let rotateAngles = [];
+
+        // Collect selected rotation angles
+        if (document.getElementById("rotate90").checked) rotateAngles.push(90);
+        if (document.getElementById("rotate180").checked)
+          rotateAngles.push(180);
+        if (document.getElementById("rotate270").checked)
+          rotateAngles.push(270);
+        if (document.getElementById("rotate-90").checked)
+          rotateAngles.push(-90);
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        if (rotateAngles.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please select at least one rotation angle.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("angles", rotateAngles.join(","));
+
+        $("#output").html(
+          "<div class='alert alert-info'>Rotating... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/rotate-pages",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Rotation successful! 
+                        <a href="${response.file_url}" class="btn btn-success">Download Rotated PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performDelete() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("deleteFile");
+        let deletePages = document.getElementById("deletePages").value.trim();
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        if (deletePages === "") {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please enter pages to delete.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("pages", deletePages);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Deleting pages... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/delete-pages",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Deletion successful! 
+                            <a href="${response.file_url}" class="btn btn-success">Download Modified PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performPasswordProtect() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("passwordFile");
+        let password = document.getElementById("pdfPassword").value.trim();
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        if (password === "") {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please enter a password.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("password", password);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Processing... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/password-protect",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>PDF Protected! 
+                    <a href="${response.file_url}" class="btn btn-success">Download Protected PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function performRemovePassword() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("unlockFile");
+        let password = document
+          .getElementById("pdfPasswordToRemove")
+          .value.trim();
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        if (password === "") {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please enter the password.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("password", password);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Processing... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/remove-password",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Password removed! 
+                        <a href="${response.file_url}" class="btn btn-success">Download Unlocked PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function (xhr) {
+            let errorMsg =
+              xhr.responseJSON?.error || "An error occurred. Please try again.";
+            $("#output").html(
+              `<div class='alert alert-danger'>${errorMsg}</div>`
+            );
+          },
+        });
+      }
+
+      function convertPdfToDocx() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("pdfToDocxFile");
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a PDF file.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Converting... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/convert-pdf-to-docx",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Conversion successful! 
+                        <a href="${response.file_url}" class="btn btn-success">Download DOCX</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+
+      function convertDocxToPdf() {
+        let formData = new FormData();
+        let fileInput = document.getElementById("docxToPdfFile");
+
+        if (fileInput.files.length === 0) {
+          $("#output").html(
+            "<div class='alert alert-warning'>Please upload a DOCX file.</div>"
+          );
+          return;
+        }
+
+        formData.append("file", fileInput.files[0]);
+
+        $("#output").html(
+          "<div class='alert alert-info'>Converting... Please wait.</div>"
+        );
+
+        $.ajax({
+          url: "/convert-docx-to-pdf",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.file_url) {
+              $("#output").html(
+                `<div class='alert alert-success'>Conversion successful! 
+                        <a href="${response.file_url}" class="btn btn-success">Download PDF</a></div>`
+              );
+            } else {
+              $("#output").html(
+                "<div class='alert alert-danger'>Unknown response from server.</div>"
+              );
+            }
+          },
+          error: function () {
+            $("#output").html(
+              "<div class='alert alert-danger'>An error occurred. Please try again.</div>"
+            );
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
